@@ -1,0 +1,8 @@
+[submodule "pyrosim"]
+	path = pyrosim
+	url = https://github.com/VThorsethief/pyrosim
+	ignore = dirty
+[submodule "CPPN"]
+	path = CPPN
+	url = https://github.com/VThorsethief/CPPN
+	ignore = dirty

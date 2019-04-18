@@ -1,0 +1,16 @@
+env/
+.env/
+.venv/
+.vscode/
+build/
+setting.json
+*.pyc
+.vscode/
+evolution_metrics/
+saved_files/
+changes_made.txt
+current_progress.txt
+*.png
+requirements.txt
+*.p
+__pycache__/
