@@ -3,7 +3,7 @@ from simplSpiderDims import SimpleSpiderDims
 from math import pi
 class SimpleSpiderBot:
     def __init__(self, sim, wts):
-        self.z_origin = c.spiderRadius * 3
+        self.z_origin = c.spiderRadius + c.vertical_displacement + 5
         self.y_origin = 0
         self.x_origin = 0
         self.numOfLegs = c.numOfLegs
@@ -58,12 +58,12 @@ class SimpleSpiderBot:
             self.j1s[n] = sim.send_hinge_spring_joint(
                 body1 = self.leg1s[n],
                 body2 = self.leg2s[n],
-                axis1= (
+                axis1 = (
                     self.dims.joint_normals['n1'][n], 
                     self.dims.joint_normals['n2'][n], 
                     0 
                 ), 
-                axis2= (
+                axis2 = (
                     self.dims.joint_normals['n1.2'][n],
                     self.dims.joint_normals['n2.2'][n],
                     0
@@ -177,9 +177,13 @@ class SimpleSpiderBot:
         self.touchSensors = {}
         #Adding touch sensors
         for n in range(self.numOfLegs):
-            self.sensors[n] = sim.send_touch_sensor(body_id = self.leg2s[n])
+            # self.sensors[n] = sim.send_touch_sensor(body_id = self.leg2s[n])
+            # self.sensorNeurons[n] = sim.send_sensor_neuron(sensor_id= self.sensors[n])
+            # self.touchSensors[n] = self.sensors[n]
+            self.touchSensors[n] = sim.send_touch_sensor(body_id = self.leg2s[n])
+            self.sensors[n] = self.touchSensors[n]
             self.sensorNeurons[n] = sim.send_sensor_neuron(sensor_id= self.sensors[n])
-            self.touchSensors[n] = self.sensors[n]
+            # self.touchSensors[n] = self.sensors[n]
 
     def add_jump_sensors(self, sim):
         self.ray_sensors = {}
@@ -200,7 +204,8 @@ class SimpleSpiderBot:
                     self.dims.ray_directions['x'][r],
                     self.dims.ray_directions['y'][r],
                     0
-                ] )
+                ],
+                max_length = 50 )
             self.ray_sensors[r] = sim.send_ray_sensor(
                 ray_id = self.rays[r],
                 which_sense = 'b'
@@ -229,38 +234,49 @@ class SimpleSpiderBot:
             self.hiddens[n] = sim.send_hidden_neuron()
 
     def add_snapses(self, sim, wts):
-        for j in self.sensorNeurons:
+        if len(self.hiddens) < 1:
+             for s in self.sensorNeurons:
+            # for h in self.hiddens:
+                for l in self.all_joints:
+                    for k in self.all_joints[l]:
+                        sim.send_synapse(
+                            source_neuron_id = self.sensorNeurons[s], 
+                            target_neuron_id = self.motorNuerons[l][k], 
+                            weight = wts[0][s][k][l]
+                        )
+        else:
+            for j in self.sensorNeurons:
+                for h in self.hiddens:
+                    sim.send_synapse(source_neuron_id = self.sensorNeurons[j], target_neuron_id = self.hiddens[h], weight = wts[0][j][h])
             for h in self.hiddens:
-                sim.send_synapse(source_neuron_id = self.sensorNeurons[j], target_neuron_id = self.hiddens[h], weight = wts[0][j][h])
-        for h in self.hiddens:
-            for h2 in self.hiddens:
-                if h == h2:
-                    continue
-                sim.send_synapse(source_neuron_id = self.hiddens[h], target_neuron_id = self.hiddens[h2], weight = wts[1][h][h2])
-        for h in self.hiddens:
-            for l in self.all_joints:
-                for k in self.all_joints[l]:
-                    try:
-                        sim.send_synapse(source_neuron_id = self.hiddens[h], target_neuron_id = self.motorNuerons[l][k], weight = wts[2][h][k][l])
-                    except TypeError:
-                        print(self.hiddens)
-                        print(self.motorNuerons[l])
-                        print(wts[2][h][l])
-                        exit()
-                    except IndexError:
-                        print("Index")
-                        print(self.hiddens)
-                        print(self.motorNuerons[l])
-                        print(wts[2][h][k][1])
-                        exit()
-        # for j in self.sensorNeurons:
-        #     # for h in self.hiddens:
-        #         for i in self.motors:
-        #             sim.send_synapse(
-        #                 source_neuron_id = self.sensorNeurons[j], 
-        #                 target_neuron_id = self.motorNueron[i], 
-        #                 weight = wts[j, i]
-        #             )
+                for h2 in self.hiddens:
+                    if h == h2:
+                        continue
+                    sim.send_synapse(source_neuron_id = self.hiddens[h], target_neuron_id = self.hiddens[h2], weight = wts[1][h][h2])
+            for h in self.hiddens:
+                for l in self.all_joints:
+                    for k in self.all_joints[l]:
+                        try:
+                            sim.send_synapse(source_neuron_id = self.hiddens[h], target_neuron_id = self.motorNuerons[l][k], weight = wts[2][h][k][l])
+                        except TypeError:
+                            print(self.hiddens)
+                            print(self.motorNuerons[l])
+                            print(wts[2][h][l])
+                            exit()
+                        except IndexError:
+                            print("Index")
+                            print(self.hiddens)
+                            print(self.motorNuerons[l])
+                            print(wts[2][h][k][1])
+                            exit()
+            # for j in self.sensorNeurons:
+            #     # for h in self.hiddens:
+            #         for i in self.motors:
+            #             sim.send_synapse(
+            #                 source_neuron_id = self.sensorNeurons[j], 
+            #                 target_neuron_id = self.motorNueron[i], 
+            #                 weight = wts[j, i]
+            #             )
 
     def assign_target(self, sim, target_id, wts):
         self.target_sensor = sim.send_distance_to_sensor(body1_id = self.body, body2_id = target_id)

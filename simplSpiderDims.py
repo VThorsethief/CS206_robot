@@ -1,8 +1,8 @@
 from math import sin, cos, sqrt, pi
-
+import constants as c
 class SimpleSpiderDims:
     def __init__(self, radius, x, y, z):
-        self.z_origin = radius * 4
+        self.z_origin = z
         self.y_origin = 0
         self.x_origin = 0
         self.body = {

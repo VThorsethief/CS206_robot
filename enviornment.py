@@ -42,10 +42,10 @@ class ENVIORNMENT:
     def Send_To(self, sim):
         #Need to  change the arguments for the experimental pyrosim
         
-        lightSource = sim.send_box(position =[self.x * 5, self.y * 5, self.large_box_size], sides = [self.l,self.l,self.l], collision_group = "light", color = [1,0,0])
+        # lightSource = sim.send_box(position =[self.x * 5, self.y * 5, self.large_box_size], sides = [self.l,self.l,self.l], collision_group = "light", color = [1,0,0])
         # light_stand = sim.send_box(position =[self.x * 2, self.y * 2, self.l], sides = [.1,.1,self.l * 2], collision_group = "env")
-        sim.add_light_to_body(body_id = lightSource, intensity = 0.25)
-        sim.send_box(position = [self.x, self.y, self.large_box_size * 0.25], sides = [self.lx,self.ly,self.large_box_size/2], color = [0, 0, 1], collision_group = "env")
+        # sim.add_light_to_body(body_id = lightSource, intensity = 0.25)
+        lightSource = sim.send_box(position = [self.x, self.y, self.large_box_size * 0.25], sides = [self.lx,self.ly,self.large_box_size/2], color = [0, 0, 1], collision_group = "env")
         return lightSource
         # sim.send_box(position = [self.x, self.y, self.large_box_size/2], \
         #     sides = [self.large_box_size, self.large_box_size, self.large_box_size* .0001],color = [1,0,0], collision_group = "env")
